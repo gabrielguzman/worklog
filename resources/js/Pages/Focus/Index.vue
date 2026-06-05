@@ -311,8 +311,11 @@ onUnmounted(() => {
 
             <!-- Historial de sesiones -->
             <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm dark:shadow-md">
-                <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+                <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                     <h2 class="font-semibold text-gray-900 dark:text-white">Sesiones recientes</h2>
+                    <Link href="/focus/history" class="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                        Ver todas →
+                    </Link>
                 </div>
                 <div class="divide-y divide-gray-50">
                     <div v-if="recentSessions.length === 0" class="px-5 py-8 text-center text-sm text-gray-400">

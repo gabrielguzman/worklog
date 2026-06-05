@@ -60,6 +60,74 @@ class FocusController extends Controller
         ]);
     }
 
+    // Historial completo de sesiones
+    public function history(Request $request)
+    {
+        $user = $request->user();
+
+        $query = $user->focusSessions()
+            ->with(['task:id,title,project_id', 'task.project:id,name,color']);
+
+        // Filtros
+        if ($search = $request->get('search')) {
+            $query->where(fn($q) => $q
+                ->where('notes', 'like', "%{$search}%")
+                ->orWhereHas('task', fn($tq) => $tq->where('title', 'like', "%{$search}%"))
+            );
+        }
+
+        if ($status = $request->get('status')) {
+            $query->where('status', $status);
+        }
+
+        if ($from = $request->get('from')) {
+            $query->whereDate('started_at', '>=', $from);
+        }
+
+        if ($to = $request->get('to')) {
+            $query->whereDate('started_at', '<=', $to);
+        }
+
+        $sessions = $query
+            ->orderBy('started_at', 'desc')
+            ->paginate(20)
+            ->withQueryString()
+            ->through(fn($s) => [
+                'id'               => $s->id,
+                'duration_minutes' => $s->duration_minutes,
+                'started_at'       => $s->started_at->format('Y-m-d H:i'),
+                'started_at_label' => $s->started_at->locale('es')->isoFormat('D MMM YYYY, HH:mm'),
+                'ended_at'         => $s->ended_at ? $s->ended_at->format('Y-m-d H:i') : null,
+                'notes'            => $s->notes,
+                'status'           => $s->status,
+                'task'             => $s->task ? [
+                    'id'       => $s->task->id,
+                    'title'    => $s->task->title,
+                    'project'  => $s->task->project ? [
+                        'id'    => $s->task->project->id,
+                        'name'  => $s->task->project->name,
+                        'color' => $s->task->project->color
+                    ] : null,
+                ] : null,
+            ]);
+
+        // Estadísticas
+        $stats = [
+            'total_sessions'      => $user->focusSessions()->count(),
+            'completed_sessions'  => $user->focusSessions()->where('status', 'completed')->count(),
+            'total_minutes'       => $user->focusSessions()->where('status', 'completed')->sum('duration_minutes'),
+            'avg_duration'        => round($user->focusSessions()->where('status', 'completed')->avg('duration_minutes'), 1),
+            'week_sessions'       => $user->focusSessions()->where('started_at', '>=', now()->startOfWeek())->where('status', 'completed')->count(),
+            'week_minutes'        => $user->focusSessions()->where('started_at', '>=', now()->startOfWeek())->where('status', 'completed')->sum('duration_minutes'),
+        ];
+
+        return Inertia::render('Focus/History', [
+            'sessions' => $sessions,
+            'stats'    => $stats,
+            'filters'  => $request->only('search', 'status', 'from', 'to'),
+        ]);
+    }
+
     // Iniciar sesión
     public function start(Request $request)
     {

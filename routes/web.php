@@ -38,6 +38,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/search', SearchController::class)->name('search');
     Route::get('/focus',                         [FocusController::class, 'index'])->name('focus.index');
+    Route::get('/focus/history',                 [FocusController::class, 'history'])->name('focus.history');
     Route::post('/focus/start',                  [FocusController::class, 'start'])->name('focus.start');
     Route::patch('/focus/{session}/complete',    [FocusController::class, 'complete'])->name('focus.complete');
     Route::patch('/focus/{session}/cancel',      [FocusController::class, 'cancel'])->name('focus.cancel');
