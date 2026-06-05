@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onUnmounted, watch } from 'vue'
+import { ref, computed, onUnmounted, onMounted, watch } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import axios from 'axios'
@@ -141,9 +141,53 @@ const submitComplete = async () => {
     }
 }
 
-const requestNotificationPermission = () => {
-    if ('Notification' in window && Notification.permission === 'default') {
-        Notification.requestPermission()
+const notificationStatus = ref('checking')
+
+const requestNotificationPermission = async () => {
+    if (!('Notification' in window)) {
+        alert('Este navegador no soporta notificaciones')
+        notificationStatus.value = 'not-supported'
+        return
+    }
+
+    if (Notification.permission === 'granted') {
+        alert('✓ Ya tienes notificaciones habilitadas')
+        notificationStatus.value = 'granted'
+        return
+    }
+
+    if (Notification.permission === 'denied') {
+        alert('❌ Las notificaciones están deshabilitadas. Debes cambiar los permisos del navegador.')
+        notificationStatus.value = 'denied'
+        return
+    }
+
+    try {
+        const permission = await Notification.requestPermission()
+        if (permission === 'granted') {
+            alert('✓ ¡Notificaciones habilitadas! Recibirás alertas cuando termine la sesión.')
+            notificationStatus.value = 'granted'
+            // Enviar notificación de prueba
+            new Notification('WorkLog - Focus', {
+                body: 'Las notificaciones están activadas. Te avisaremos cuando termine tu sesión.',
+                icon: '🍅'
+            })
+        } else {
+            notificationStatus.value = 'denied'
+        }
+    } catch (error) {
+        console.error('Error al solicitar permiso:', error)
+        notificationStatus.value = 'error'
+    }
+}
+
+// Enviar notificación cuando termine la sesión
+const onTimerEnd = () => {
+    if ('Notification' in window && Notification.permission === 'granted' && !showComplete.value) {
+        new Notification('WorkLog - Sesión completada', {
+            body: `¡Tu sesión de ${duration.value} minutos ha terminado!`,
+            icon: '🍅'
+        })
     }
 }
 
@@ -164,6 +208,19 @@ const PRIORITY_DOT = {
     medium: 'bg-yellow-400',
     low:    'bg-gray-300',
 }
+
+onMounted(() => {
+    // Detectar estado actual de notificaciones
+    if ('Notification' in window) {
+        if (Notification.permission === 'granted') {
+            notificationStatus.value = 'granted'
+        } else if (Notification.permission === 'denied') {
+            notificationStatus.value = 'denied'
+        }
+    } else {
+        notificationStatus.value = 'not-supported'
+    }
+})
 
 onUnmounted(() => {
     clearInterval(intervalRef.value)
@@ -191,8 +248,13 @@ onUnmounted(() => {
                         📊 Historial
                     </Link>
                     <button @click="requestNotificationPermission"
-                        class="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 transition-colors">
-                        🔔 Activar notificaciones
+                        :class="[
+                            'text-xs border rounded-lg px-3 py-1.5 transition-colors font-medium',
+                            notificationStatus === 'granted'
+                                ? 'text-green-600 dark:text-green-400 border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20'
+                                : 'text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 border-gray-200 dark:border-gray-700'
+                        ]">
+                        {{ notificationStatus === 'granted' ? '✓ Notificaciones activas' : '🔔 Activar notificaciones' }}
                     </button>
                 </div>
             </div>
