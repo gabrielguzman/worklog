@@ -1,0 +1,213 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Accesibilidad Base ──────────────────────────────────────────────────────── */
+
+@layer base {
+    /* Suavizar scroll */
+    html {
+        scroll-behavior: smooth;
+    }
+
+    /* Focus visible para keyboard navigation */
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible,
+    select:focus-visible,
+    [tabindex]:focus-visible {
+        @apply outline-2 outline-offset-2 outline-blue-500 rounded;
+    }
+
+    /* Dark mode focus */
+    .dark button:focus-visible,
+    .dark a:focus-visible,
+    .dark input:focus-visible,
+    .dark textarea:focus-visible,
+    .dark select:focus-visible,
+    .dark [tabindex]:focus-visible {
+        @apply outline-blue-400;
+    }
+}
+
+/* ── Transiciones suaves globales ────────────────────────────────────────────── */
+
+@layer base {
+    /* Animación suave para cambios de color */
+    * {
+        @apply transition-colors duration-smooth;
+    }
+
+    /* Links y botones con transiciones */
+    a,
+    button {
+        @apply transition-all duration-smooth;
+    }
+
+    /* Inputs con transición suave */
+    input,
+    textarea,
+    select {
+        @apply transition-all duration-smooth;
+    }
+}
+
+@layer components {
+    /* Screen reader only - hide visually but keep in a11y tree */
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+    }
+
+    .sr-only:focus-visible {
+        @apply not-sr-only;
+    }
+
+    /* Card con transición al hover */
+    .card-hover {
+        @apply transition-all duration-smooth hover:shadow-lg hover:scale-105;
+    }
+
+    /* Button con transición */
+    .btn-transition {
+        @apply transition-all duration-smooth active:scale-95;
+    }
+
+    /* Fade in animation para elementos */
+    .fade-in {
+        @apply animate-fade-in;
+    }
+
+    /* Slide up animation */
+    .slide-up {
+        @apply animate-slide-up;
+    }
+
+    /* Bounce in animation */
+    .bounce-in {
+        @apply animate-bounce-in;
+    }
+}
+
+/* ── Page transitions (Inertia.js) ────────────────────────────────────────────── */
+
+.page-enter-active,
+.page-leave-active {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.page-enter-from {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.page-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+/* ── List item transitions ────────────────────────────────────────────────────── */
+
+.list-item-enter-active,
+.list-item-leave-active {
+    transition: all 0.3s ease;
+}
+
+.list-item-enter-from {
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+.list-item-leave-to {
+    opacity: 0;
+    transform: translateX(20px);
+}
+
+/* ── Move transition para drag-drop ────────────────────────────────────────────── */
+
+.list-move {
+    transition: transform 0.2s ease;
+}
+
+/* ── Modal transitions ────────────────────────────────────────────────────────── */
+
+.modal-backdrop {
+    @apply transition-opacity duration-smooth;
+}
+
+.modal-content {
+    @apply transition-all duration-smooth;
+}
+
+/* ── Smooth scrolling ────────────────────────────────────────────────────────── */
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* ── Loading state ────────────────────────────────────────────────────────────── */
+
+.loading-spinner {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 2px solid #fff;
+    width: 24px;
+    height: 24px;
+    animation: spin 0.8s linear infinite;
+}
+
+.loading-spinner-sm {
+    border: 2px solid rgba(59, 130, 246, 0.2);
+    border-radius: 50%;
+    border-top: 2px solid #3B82F6;
+    width: 16px;
+    height: 16px;
+    animation: spin 0.8s linear infinite;
+}
+
+.loading-spinner-lg {
+    border: 3px solid rgba(59, 130, 246, 0.2);
+    border-radius: 50%;
+    border-top: 3px solid #3B82F6;
+    width: 40px;
+    height: 40px;
+    animation: spin 0.8s linear infinite;
+}
+
+/* Button loading state */
+.btn-loading {
+    opacity: 0.75;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Pulse animation para placeholders */
+.pulse-soft {
+    animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-soft {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
