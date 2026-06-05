@@ -199,7 +199,9 @@ class ProfileController extends Controller
         }
 
         return collect($activities)
-            ->sortByDesc('timestamp')
+            ->sort(function ($a, $b) {
+                return strtotime($b['timestamp']) - strtotime($a['timestamp']);
+            })
             ->take(10)
             ->values()
             ->all();
