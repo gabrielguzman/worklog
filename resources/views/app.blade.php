@@ -3,6 +3,14 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="WorkLog - Gestión de tiempo, tareas y sesiones de enfoque">
+        <meta name="theme-color" content="#2563eb">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="WorkLog">
+        <link rel="manifest" href="/manifest.json">
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><text x='50%' y='50%' font-size='90' fill='%23000' text-anchor='middle' dominant-baseline='middle'>🍅</text></svg>">
+        <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%232563eb' width='180' height='180' rx='40'/><text x='90' y='90' font-size='120' fill='white' text-anchor='middle' dominant-baseline='middle'>🍅</text></svg>">
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
