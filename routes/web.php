@@ -14,6 +14,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TaskCommentController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -72,6 +73,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/export/entries/csv',       [ExportController::class, 'entriesCSV'])->name('export.entries.csv');
     Route::get('/export/report/daily/csv',  [ExportController::class, 'reportDailyCSV'])->name('export.report.daily.csv');
     Route::get('/export/report/weekly/csv', [ExportController::class, 'reportWeeklyCSV'])->name('export.report.weekly.csv');
+
+    // Task Comments
+    Route::get('/api/tasks/{task}/comments',        [TaskCommentController::class, 'getTaskComments'])->name('task-comments.index');
+    Route::post('/api/tasks/{task}/comments',       [TaskCommentController::class, 'store'])->name('task-comments.store');
+    Route::patch('/api/comments/{comment}',         [TaskCommentController::class, 'update'])->name('task-comments.update');
+    Route::delete('/api/comments/{comment}',        [TaskCommentController::class, 'destroy'])->name('task-comments.destroy');
 });
 
 require __DIR__.'/auth.php';

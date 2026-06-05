@@ -1,7 +1,8 @@
 <script setup>
 import { ref } from 'vue'
-import { Head, Link, router, useForm } from '@inertiajs/vue3'
+import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import TaskComments from '@/Components/TaskComments.vue'
 
 const props = defineProps({ task: Object })
 
@@ -449,6 +450,9 @@ const toggleSubtask = (id) => {
                     </form>
                 </div>
             </div>
+
+            <!-- Comentarios -->
+            <TaskComments :task-id="task.id" :user="usePage().props.auth.user" />
         </Transition>
     </AppLayout>
 </template>

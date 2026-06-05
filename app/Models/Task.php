@@ -32,6 +32,7 @@ class Task extends Model
     public function attachments()   { return $this->morphMany(Attachment::class, 'attachable'); }
     public function focusSessions() { return $this->hasMany(FocusSession::class); }
     public function subtasks()      { return $this->hasMany(Task::class, 'parent_task_id')->orderBy('sort_order', 'asc')->orderBy('created_at', 'asc'); }
+    public function comments()      { return $this->hasMany(TaskComment::class)->orderBy('created_at', 'desc'); }
 
     public function markDone(): void
     {
