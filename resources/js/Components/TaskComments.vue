@@ -44,8 +44,16 @@ const submitComment = async () => {
         newComment.value = ''
         error.value = null
     } catch (e) {
-        error.value = 'Error al agregar comentario'
-        console.error(e)
+        console.error('Error al agregar comentario:', e)
+        if (e.response?.status === 404) {
+            error.value = 'La tarea no existe'
+        } else if (e.response?.status === 422) {
+            error.value = 'El comentario es requerido'
+        } else if (e.response?.status === 500) {
+            error.value = 'Error del servidor - verifica que la migración está ejecutada'
+        } else {
+            error.value = `Error: ${e.response?.data?.message || e.message}`
+        }
     } finally {
         loading.value = false
     }

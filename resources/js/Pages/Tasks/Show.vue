@@ -404,6 +404,9 @@ const toggleSubtask = (id) => {
                 </div>
             </div>
 
+            <!-- Comentarios -->
+            <TaskComments :task-id="task.id" :user="usePage().props.auth.user" />
+
         </div>
 
         <!-- Modal entrada rápida -->
@@ -450,9 +453,6 @@ const toggleSubtask = (id) => {
                     </form>
                 </div>
             </div>
-
-            <!-- Comentarios -->
-            <TaskComments :task-id="task.id" :user="usePage().props.auth.user" />
         </Transition>
     </AppLayout>
 </template>
