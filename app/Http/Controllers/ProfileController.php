@@ -61,7 +61,9 @@ class ProfileController extends Controller
                     'count' => $tasks->count(),
                 ];
             })
-            ->sortByDesc('count')
+            ->sort(function ($a, $b) {
+                return $b['count'] <=> $a['count'];
+            })
             ->take(5)
             ->values();
 
