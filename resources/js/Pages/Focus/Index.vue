@@ -181,15 +181,6 @@ const requestNotificationPermission = async () => {
     }
 }
 
-// Enviar notificación cuando termine la sesión
-const onTimerEnd = () => {
-    if ('Notification' in window && Notification.permission === 'granted' && !showComplete.value) {
-        new Notification('WorkLog - Sesión completada', {
-            body: `¡Tu sesión de ${duration.value} minutos ha terminado!`,
-            icon: '🍅'
-        })
-    }
-}
 
 const selectDuration = (d) => {
     if (running.value) return
