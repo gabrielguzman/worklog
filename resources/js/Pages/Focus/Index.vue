@@ -185,10 +185,16 @@ onUnmounted(() => {
                         Hoy: {{ formatMinutes(todayMinutes) }} · Esta semana: {{ weekSessions }} sesiones
                     </p>
                 </div>
-                <button @click="requestNotificationPermission"
-                    class="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 transition-colors">
-                    🔔 Activar notificaciones
-                </button>
+                <div class="flex items-center gap-2">
+                    <Link href="/focus/history"
+                        class="text-xs text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 transition-colors font-medium">
+                        📊 Historial
+                    </Link>
+                    <button @click="requestNotificationPermission"
+                        class="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 transition-colors">
+                        🔔 Activar notificaciones
+                    </button>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
