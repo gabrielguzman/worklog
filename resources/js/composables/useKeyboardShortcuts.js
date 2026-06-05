@@ -2,25 +2,25 @@ import { onMounted, onUnmounted } from 'vue'
 
 const shortcuts = [
     {
-        keys: ['cmd', 'k'],
+        keys: ['ctrl', '/'],
         label: 'Búsqueda global',
         description: 'Abre búsqueda global',
         handler: null,
     },
     {
-        keys: ['cmd', 'n'],
+        keys: ['ctrl', 'alt', 'n'],
         label: 'Nueva tarea',
         description: 'Crea una nueva tarea',
         handler: null,
     },
     {
-        keys: ['cmd', 'shift', 'n'],
+        keys: ['ctrl', 'alt', 'e'],
         label: 'Captura rápida',
         description: 'Abre captura rápida (entrada o tarea)',
         handler: null,
     },
     {
-        keys: ['cmd', 'shift', 'd'],
+        keys: ['ctrl', 'alt', 'd'],
         label: 'Toggle Dark Mode',
         description: 'Cambia entre modo claro y oscuro',
         handler: null,
@@ -47,52 +47,52 @@ export function useKeyboardShortcuts() {
     }
 
     const handleKeyDown = (e) => {
-        // No ejecutar si está escribiendo en un input
+        // No ejecutar si está escribiendo en un input (excepto algunos atajos)
         if (
             e.target.tagName === 'INPUT' ||
             e.target.tagName === 'TEXTAREA' ||
             e.target.contentEditable === 'true'
         ) {
             // Permitir algunos atajos incluso en inputs
-            if (!(e.metaKey || e.ctrlKey) && e.key !== '?') {
+            if (!(e.ctrlKey && (e.key === '/' || e.key === 'alt')) && e.key !== '?') {
                 return
             }
         }
 
-        const isMacOS = e.metaKey
         const isCtrl = e.ctrlKey
+        const isAlt = e.altKey
         const isShift = e.shiftKey
 
-        // Cmd+K o Ctrl+K
-        if ((isMacOS || isCtrl) && e.key === 'k') {
+        // Ctrl+/ para búsqueda global
+        if (isCtrl && e.key === '/') {
             e.preventDefault()
-            const handler = shortcuts.find(s => JSON.stringify(s.keys) === JSON.stringify(['cmd', 'k']))?.handler
+            const handler = shortcuts.find(s => JSON.stringify(s.keys) === JSON.stringify(['ctrl', '/']))?.handler
             handler?.()
         }
 
-        // Cmd+N o Ctrl+N
-        if ((isMacOS || isCtrl) && e.key === 'n' && !isShift) {
+        // Ctrl+Alt+N para nueva tarea
+        if (isCtrl && isAlt && e.key === 'n') {
             e.preventDefault()
-            const handler = shortcuts.find(s => JSON.stringify(s.keys) === JSON.stringify(['cmd', 'n']))?.handler
+            const handler = shortcuts.find(s => JSON.stringify(s.keys) === JSON.stringify(['ctrl', 'alt', 'n']))?.handler
             handler?.()
         }
 
-        // Cmd+Shift+N o Ctrl+Shift+N
-        if ((isMacOS || isCtrl) && e.key === 'n' && isShift) {
+        // Ctrl+Alt+E para captura rápida
+        if (isCtrl && isAlt && e.key === 'e') {
             e.preventDefault()
-            const handler = shortcuts.find(s => JSON.stringify(s.keys) === JSON.stringify(['cmd', 'shift', 'n']))?.handler
+            const handler = shortcuts.find(s => JSON.stringify(s.keys) === JSON.stringify(['ctrl', 'alt', 'e']))?.handler
             handler?.()
         }
 
-        // Cmd+Shift+D o Ctrl+Shift+D
-        if ((isMacOS || isCtrl) && e.key === 'd' && isShift) {
+        // Ctrl+Alt+D para dark mode
+        if (isCtrl && isAlt && e.key === 'd') {
             e.preventDefault()
-            const handler = shortcuts.find(s => JSON.stringify(s.keys) === JSON.stringify(['cmd', 'shift', 'd']))?.handler
+            const handler = shortcuts.find(s => JSON.stringify(s.keys) === JSON.stringify(['ctrl', 'alt', 'd']))?.handler
             handler?.()
         }
 
         // ? para ayuda
-        if (e.key === '?' && !isCtrl && !isMacOS) {
+        if (e.key === '?' && !isCtrl && !isAlt) {
             e.preventDefault()
             const handler = shortcuts.find(s => JSON.stringify(s.keys) === JSON.stringify(['?']))?.handler
             handler?.()
@@ -117,6 +117,8 @@ export function useKeyboardShortcuts() {
         ...s,
         keysDisplay: s.keys.map(k => {
             if (k === 'cmd') return isMac() ? '⌘' : 'Ctrl'
+            if (k === 'ctrl') return 'Ctrl'
+            if (k === 'alt') return isMac() ? '⌥' : 'Alt'
             if (k === 'shift') return '⇧'
             return k.toUpperCase()
         }).join(' + ')
