@@ -38,8 +38,15 @@ export function useKeyboardShortcuts() {
     const cmdKey = isMac() ? '⌘' : 'Ctrl'
 
     const registerShortcut = (keyCombo, handler) => {
+        // Convertir string 'ctrl,alt,n' a array ['ctrl', 'alt', 'n']
+        const keysArray = typeof keyCombo === 'string'
+            ? keyCombo.split(',').map(k => k.trim())
+            : Array.isArray(keyCombo)
+            ? keyCombo
+            : [keyCombo]
+
         const idx = shortcuts.findIndex(s =>
-            JSON.stringify(s.keys) === JSON.stringify(Array.isArray(keyCombo) ? keyCombo : [keyCombo])
+            JSON.stringify(s.keys) === JSON.stringify(keysArray)
         )
         if (idx !== -1) {
             shortcuts[idx].handler = handler

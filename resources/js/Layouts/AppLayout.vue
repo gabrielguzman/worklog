@@ -140,10 +140,10 @@ onMounted(() => {
 
     // Setup keyboard shortcuts
     setupShortcuts({
-        'cmd,k': () => router.visit('/search'),
-        'cmd,n': () => openQuick('task'),
-        'cmd,shift,n': () => quickOpen.value ? closeQuick() : openQuick('entry'),
-        'cmd,shift,d': () => toggleDarkMode(),
+        'ctrl,/': () => router.visit('/search'),
+        'ctrl,alt,n': () => openQuick('task'),
+        'ctrl,alt,e': () => quickOpen.value ? closeQuick() : openQuick('entry'),
+        'ctrl,alt,d': () => toggleDarkMode(),
     })
 
     onUnmounted(() => {
