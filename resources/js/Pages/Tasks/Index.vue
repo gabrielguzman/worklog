@@ -290,17 +290,17 @@ const onDragEnd = () => {
                 </div>
 
                 <div class="flex gap-2 flex-wrap">
-                    <select v-model="priority" class="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-sm focus:border-blue-400 focus:outline-none">
+                    <select v-model="priority" class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-1.5 text-sm focus:border-blue-400 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 appearance-none pr-8 cursor-pointer" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%23666%22><path stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22></path></svg>'); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px;">
                         <option value="">Toda prioridad</option>
                         <option v-for="(cfg, val) in PRIORITY" :key="val" :value="val">{{ cfg.label }}</option>
                     </select>
 
-                    <select v-model="project_id" class="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-sm focus:border-blue-400 focus:outline-none">
+                    <select v-model="project_id" class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-1.5 text-sm focus:border-blue-400 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 appearance-none pr-8 cursor-pointer" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%23666%22><path stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22></path></svg>'); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px;">
                         <option value="">Todos los proyectos</option>
                         <option v-for="p in projects" :key="p.id" :value="p.id">{{ p.name }}</option>
                     </select>
 
-                    <select v-model="tag" class="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-sm focus:border-blue-400 focus:outline-none">
+                    <select v-model="tag" class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-1.5 text-sm focus:border-blue-400 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 appearance-none pr-8 cursor-pointer" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%23666%22><path stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22></path></svg>'); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px;">
                         <option value="">Todos los tags</option>
                         <option v-for="t in tags" :key="t.id" :value="t.name">{{ t.name }}</option>
                     </select>
@@ -361,7 +361,7 @@ const onDragEnd = () => {
                         <!-- Status dropdown -->
                         <div>
                             <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Estado (opcional)</label>
-                            <select v-model="bulkForm.status" class="w-full rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none dark:bg-gray-700 dark:text-white">
+                            <select v-model="bulkForm.status" class="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 text-sm focus:border-blue-400 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 appearance-none pr-8 cursor-pointer" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%23666%22><path stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22></path></svg>'); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px;">
                                 <option value="">Sin cambios</option>
                                 <option value="pending">Pendiente</option>
                                 <option value="in_progress">En progreso</option>
@@ -372,7 +372,7 @@ const onDragEnd = () => {
                         <!-- Priority dropdown -->
                         <div>
                             <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Prioridad (opcional)</label>
-                            <select v-model="bulkForm.priority" class="w-full rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none dark:bg-gray-700 dark:text-white">
+                            <select v-model="bulkForm.priority" class="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 text-sm focus:border-blue-400 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 appearance-none pr-8 cursor-pointer" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%23666%22><path stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22></path></svg>'); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px;">
                                 <option value="">Sin cambios</option>
                                 <option value="low">Baja</option>
                                 <option value="medium">Media</option>
@@ -384,7 +384,7 @@ const onDragEnd = () => {
                         <!-- Project dropdown -->
                         <div>
                             <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Proyecto (opcional)</label>
-                            <select v-model="bulkForm.project_id" class="w-full rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none dark:bg-gray-700 dark:text-white">
+                            <select v-model="bulkForm.project_id" class="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 text-sm focus:border-blue-400 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 appearance-none pr-8 cursor-pointer" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%23666%22><path stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22></path></svg>'); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px;">
                                 <option value="">Sin cambios</option>
                                 <option v-for="p in projects" :key="p.id" :value="p.id">{{ p.name }}</option>
                             </select>

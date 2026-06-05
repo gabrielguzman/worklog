@@ -137,19 +137,21 @@ const hasFilters = computed(() => project_id.value || tag.value || from.value ||
                 <!-- Filtros adicionales -->
                 <div class="flex gap-2 flex-wrap">
                     <select v-model="project_id"
-                        class="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-sm focus:border-blue-400 focus:outline-none bg-white dark:bg-gray-800">
+                        class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-1.5 text-sm focus:border-blue-400 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 appearance-none pr-8 cursor-pointer"
+                        style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%23666%22><path stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22></path></svg>'); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px;">
                         <option value="">Todos los proyectos</option>
                         <option v-for="p in projects" :key="p.id" :value="p.id">{{ p.name }}</option>
                     </select>
                     <select v-model="tag"
-                        class="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-sm focus:border-blue-400 focus:outline-none bg-white dark:bg-gray-800">
+                        class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-1.5 text-sm focus:border-blue-400 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 appearance-none pr-8 cursor-pointer"
+                        style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%23666%22><path stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 14l-7 7m0 0l-7-7m7 7V3%22></path></svg>'); background-repeat: no-repeat; background-position: right 8px center; background-size: 16px;">
                         <option value="">Todos los tags</option>
                         <option v-for="t in tags" :key="t.id" :value="t.name">{{ t.name }}</option>
                     </select>
                     <input v-model="from" type="date" placeholder="Desde"
-                        class="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-sm focus:border-blue-400 focus:outline-none bg-white dark:bg-gray-800" />
+                        class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-1.5 text-sm focus:border-blue-400 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900" />
                     <input v-model="to" type="date" placeholder="Hasta"
-                        class="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-sm focus:border-blue-400 focus:outline-none bg-white dark:bg-gray-800" />
+                        class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-1.5 text-sm focus:border-blue-400 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900" />
                     <button v-if="hasFilters" @click="project_id = ''; tag = ''; from = ''; to = ''"
                         class="flex items-center gap-1 rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:bg-red-900/30 dark:bg-red-900/30 transition-colors">
                         Limpiar filtros
