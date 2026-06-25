@@ -23,9 +23,18 @@ class DashboardController extends Controller
         $pendingTasks = $user->tasks()
             ->with(['project:id,name,color', 'tags:id,name,color'])
             ->whereIn('status', ['pending', 'in_progress'])
-            ->orderByRaw("FIELD(priority, 'urgent', 'high', 'medium', 'low')")
+            ->orderByRaw("
+        CASE priority
+            WHEN 'urgent' THEN 1
+            WHEN 'high' THEN 2
+            WHEN 'medium' THEN 3
+            WHEN 'low' THEN 4
+            ELSE 5
+        END
+    ")
             ->orderBy('due_date', 'asc')
             ->limit(8)
+            ->get()
             ->get()
             ->map(fn($t) => [
                 'id'       => $t->id,
@@ -49,7 +58,7 @@ class DashboardController extends Controller
                 'title'    => $e->title,
                 'type'     => $e->type,
                 'time'     => substr($e->entry_time, 0, 5),
-                'is_pinned'=> $e->is_pinned,
+                'is_pinned' => $e->is_pinned,
                 'project'  => $e->project ? ['name' => $e->project->name, 'color' => $e->project->color] : null,
                 'tags'     => $e->tags->map(fn($tag) => ['name' => $tag->name, 'color' => $tag->color]),
                 'attachments_count' => $e->attachments()->count(),
@@ -185,15 +194,15 @@ class DashboardController extends Controller
                 'entries_today'        => $entriestoday,
                 'tasks_pending'        => $tasksPending,
                 'files_this_week'      => $filesThisWeek,
-                'tasks_completed_today'=> $tasksCompletedToday,
+                'tasks_completed_today' => $tasksCompletedToday,
             ],
             'pendingTasks'  => $pendingTasks,
             'todayEntries'  => $todayEntries,
             'recentEntries' => $recentEntries,
             'recentFiles'   => $recentFiles,
             'weekActivity'  => $weekActivity,
-            'recentActivity'=> $recentActivity,
-            'todayFormatted'=> Carbon::today()->locale('es')->isoFormat('dddd D [de] MMMM'),
+            'recentActivity' => $recentActivity,
+            'todayFormatted' => Carbon::today()->locale('es')->isoFormat('dddd D [de] MMMM'),
             'chartData' => [
                 'last30Days'            => $last30Days,
                 'projectDistribution'   => $projectDistribution,
