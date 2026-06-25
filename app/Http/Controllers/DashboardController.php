@@ -14,9 +14,9 @@ class DashboardController extends Controller
         $today = Carbon::today();
 
         // Métricas
-        $entriestoday      = $user->entries()->whereDate('entry_date', $today)->count();
-        $tasksPending      = $user->tasks()->whereIn('status', ['pending', 'in_progress'])->count();
-        $filesThisWeek     = $user->attachments()->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()])->count();
+        $entriestoday        = $user->entries()->whereDate('entry_date', $today)->count();
+        $tasksPending        = $user->tasks()->whereIn('status', ['pending', 'in_progress'])->count();
+        $filesThisWeek       = $user->attachments()->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()])->count();
         $tasksCompletedToday = $user->tasks()->whereDate('completed_at', $today)->count();
 
         // Tareas pendientes (top 8, priorizadas)
@@ -24,27 +24,26 @@ class DashboardController extends Controller
             ->with(['project:id,name,color', 'tags:id,name,color'])
             ->whereIn('status', ['pending', 'in_progress'])
             ->orderByRaw("
-        CASE priority
-            WHEN 'urgent' THEN 1
-            WHEN 'high' THEN 2
-            WHEN 'medium' THEN 3
-            WHEN 'low' THEN 4
-            ELSE 5
-        END
-    ")
+                CASE priority
+                    WHEN 'urgent' THEN 1
+                    WHEN 'high' THEN 2
+                    WHEN 'medium' THEN 3
+                    WHEN 'low' THEN 4
+                    ELSE 5
+                END
+            ")
             ->orderBy('due_date', 'asc')
             ->limit(8)
             ->get()
-            ->get()
             ->map(fn($t) => [
-                'id'       => $t->id,
-                'title'    => $t->title,
-                'priority' => $t->priority,
-                'status'   => $t->status,
-                'due_date' => $t->due_date ? $t->due_date->format('d/m') : null,
+                'id'         => $t->id,
+                'title'      => $t->title,
+                'priority'   => $t->priority,
+                'status'     => $t->status,
+                'due_date'   => $t->due_date ? $t->due_date->format('d/m') : null,
                 'is_overdue' => $t->due_date && $t->due_date->isPast(),
-                'project'  => $t->project ? ['name' => $t->project->name, 'color' => $t->project->color] : null,
-                'tags'     => $t->tags->map(fn($tag) => ['name' => $tag->name, 'color' => $tag->color]),
+                'project'    => $t->project ? ['name' => $t->project->name, 'color' => $t->project->color] : null,
+                'tags'       => $t->tags->map(fn($tag) => ['name' => $tag->name, 'color' => $tag->color]),
             ]);
 
         // Entradas de hoy
@@ -54,13 +53,13 @@ class DashboardController extends Controller
             ->orderBy('entry_time', 'asc')
             ->get()
             ->map(fn($e) => [
-                'id'       => $e->id,
-                'title'    => $e->title,
-                'type'     => $e->type,
-                'time'     => substr($e->entry_time, 0, 5),
-                'is_pinned' => $e->is_pinned,
-                'project'  => $e->project ? ['name' => $e->project->name, 'color' => $e->project->color] : null,
-                'tags'     => $e->tags->map(fn($tag) => ['name' => $tag->name, 'color' => $tag->color]),
+                'id'                => $e->id,
+                'title'             => $e->title,
+                'type'              => $e->type,
+                'time'              => substr($e->entry_time, 0, 5),
+                'is_pinned'         => $e->is_pinned,
+                'project'           => $e->project ? ['name' => $e->project->name, 'color' => $e->project->color] : null,
+                'tags'              => $e->tags->map(fn($tag) => ['name' => $tag->name, 'color' => $tag->color]),
                 'attachments_count' => $e->attachments()->count(),
             ]);
 
@@ -80,10 +79,11 @@ class DashboardController extends Controller
         // Actividad semanal (entradas por día, últimos 7 días)
         $weekActivity = collect(range(6, 0))->map(function ($daysAgo) use ($user) {
             $date = Carbon::today()->subDays($daysAgo);
+
             return [
-                'label' => $date->locale('es')->isoFormat('ddd'),
-                'date'  => $date->format('Y-m-d'),
-                'count' => $user->entries()->whereDate('entry_date', $date)->count(),
+                'label'    => $date->locale('es')->isoFormat('ddd'),
+                'date'     => $date->format('Y-m-d'),
+                'count'    => $user->entries()->whereDate('entry_date', $date)->count(),
                 'is_today' => $date->isToday(),
             ];
         });
@@ -141,6 +141,7 @@ class DashboardController extends Controller
         // Gráfico: Tareas completadas últimos 30 días
         $last30Days = collect(range(29, 0))->map(function ($daysAgo) use ($user) {
             $date = Carbon::today()->subDays($daysAgo);
+
             return [
                 'date'  => $date->format('M d'),
                 'count' => $user->tasks()
@@ -180,6 +181,7 @@ class DashboardController extends Controller
         // Gráfico: Tiempo de enfoque últimos 7 días
         $focusLast7Days = collect(range(6, 0))->map(function ($daysAgo) use ($user) {
             $date = Carbon::today()->subDays($daysAgo);
+
             return [
                 'date'    => $date->format('ddd'),
                 'minutes' => $user->focusSessions()
@@ -191,23 +193,23 @@ class DashboardController extends Controller
 
         return Inertia::render('Dashboard', [
             'metrics' => [
-                'entries_today'        => $entriestoday,
-                'tasks_pending'        => $tasksPending,
-                'files_this_week'      => $filesThisWeek,
+                'entries_today'         => $entriestoday,
+                'tasks_pending'         => $tasksPending,
+                'files_this_week'       => $filesThisWeek,
                 'tasks_completed_today' => $tasksCompletedToday,
             ],
-            'pendingTasks'  => $pendingTasks,
-            'todayEntries'  => $todayEntries,
-            'recentEntries' => $recentEntries,
-            'recentFiles'   => $recentFiles,
-            'weekActivity'  => $weekActivity,
-            'recentActivity' => $recentActivity,
-            'todayFormatted' => Carbon::today()->locale('es')->isoFormat('dddd D [de] MMMM'),
-            'chartData' => [
-                'last30Days'            => $last30Days,
-                'projectDistribution'   => $projectDistribution,
-                'priorityDistribution'  => $priorityDistribution,
-                'focusLast7Days'        => $focusLast7Days,
+            'pendingTasks'    => $pendingTasks,
+            'todayEntries'    => $todayEntries,
+            'recentEntries'   => $recentEntries,
+            'recentFiles'     => $recentFiles,
+            'weekActivity'    => $weekActivity,
+            'recentActivity'  => $recentActivity,
+            'todayFormatted'  => Carbon::today()->locale('es')->isoFormat('dddd D [de] MMMM'),
+            'chartData'       => [
+                'last30Days'           => $last30Days,
+                'projectDistribution'  => $projectDistribution,
+                'priorityDistribution' => $priorityDistribution,
+                'focusLast7Days'       => $focusLast7Days,
             ],
         ]);
     }
