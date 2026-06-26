@@ -17,7 +17,15 @@ class FocusController extends Controller
         $pendingTasks = $user->tasks()
             ->with(['project:id,name,color'])
             ->whereIn('status', ['pending', 'in_progress'])
-            ->orderByRaw("FIELD(priority,'urgent','high','medium','low')")
+            ->orderByRaw("
+                CASE priority
+                    WHEN 'urgent' THEN 1
+                    WHEN 'high' THEN 2
+                    WHEN 'medium' THEN 3
+                    WHEN 'low' THEN 4
+                    ELSE 5
+                END
+            ")
             ->orderBy('due_date', 'asc')
             ->get(['id', 'title', 'priority', 'status', 'project_id'])
             ->map(fn($t) => [
@@ -70,9 +78,10 @@ class FocusController extends Controller
 
         // Filtros
         if ($search = $request->get('search')) {
-            $query->where(fn($q) => $q
-                ->where('notes', 'like', "%{$search}%")
-                ->orWhereHas('task', fn($tq) => $tq->where('title', 'like', "%{$search}%"))
+            $query->where(
+                fn($q) => $q
+                    ->where('notes', 'like', "%{$search}%")
+                    ->orWhereHas('task', fn($tq) => $tq->where('title', 'like', "%{$search}%"))
             );
         }
 
