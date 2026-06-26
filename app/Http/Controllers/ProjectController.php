@@ -100,15 +100,30 @@ class ProjectController extends Controller
         // Tareas del proyecto
         $tasks = $project->tasks()
             ->with(['tags:id,name,color'])
-            ->orderByRaw("FIELD(status,'in_progress','pending','done')")
-            ->orderByRaw("FIELD(priority,'urgent','high','medium','low')")
+            ->orderByRaw("
+                CASE status
+                    WHEN 'in_progress' THEN 1
+                    WHEN 'pending' THEN 2
+                    WHEN 'done' THEN 3
+                    ELSE 4
+                END
+            ")
+            ->orderByRaw("
+                CASE priority
+                    WHEN 'urgent' THEN 1
+                    WHEN 'high' THEN 2
+                    WHEN 'medium' THEN 3
+                    WHEN 'low' THEN 4
+                    ELSE 5
+                END
+            ")
             ->get()
             ->map(fn($t) => [
                 'id'       => $t->id,
                 'title'    => $t->title,
                 'priority' => $t->priority,
                 'status'   => $t->status,
-                'due_date' => $t->due_date ? $t->due_date->locale : null('es')->isoFormat('D MMM'),
+                'due_date' => $t->due_date ? $t->due_date->locale('es')->isoFormat('D MMM') : null,
                 'tags'     => $t->tags->map(fn($tag) => ['name' => $tag->name, 'color' => $tag->color]),
             ]);
 
