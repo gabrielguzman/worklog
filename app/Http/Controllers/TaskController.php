@@ -24,9 +24,10 @@ class TaskController extends Controller
             ]);
 
         if ($search = $request->get('search')) {
-            $query->where(fn($q) => $q
-                ->where('title', 'like', "%{$search}%")
-                ->orWhere('description', 'like', "%{$search}%")
+            $query->where(
+                fn($q) => $q
+                    ->where('title', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
             );
         }
 
@@ -53,13 +54,28 @@ class TaskController extends Controller
 
         if ($request->boolean('overdue')) {
             $query->whereNotNull('due_date')
-                  ->where('due_date', '<', Carbon::today())
-                  ->where('status', '!=', 'done');
+                ->where('due_date', '<', Carbon::today())
+                ->where('status', '!=', 'done');
         }
 
         $tasks = $query
-            ->orderByRaw("FIELD(status,'in_progress','pending','done')")
-            ->orderByRaw("FIELD(priority,'urgent','high','medium','low')")
+            ->orderByRaw("
+                CASE status
+                    WHEN 'in_progress' THEN 1
+                    WHEN 'pending' THEN 2
+                    WHEN 'done' THEN 3
+                    ELSE 4
+                END
+            ")
+            ->orderByRaw("
+                CASE priority
+                    WHEN 'urgent' THEN 1
+                    WHEN 'high' THEN 2
+                    WHEN 'medium' THEN 3
+                    WHEN 'low' THEN 4
+                    ELSE 5
+                END
+            ")
             ->orderBy('due_date', 'asc')
             ->orderBy('sort_order', 'asc')
             ->paginate(30)
@@ -71,7 +87,7 @@ class TaskController extends Controller
                 'priority'    => $t->priority,
                 'status'      => $t->status,
                 'due_date'    => $t->due_date ? $t->due_date->format('Y-m-d') : null,
-                'due_label'   => $t->due_date ? $t->due_date->locale : null('es')->isoFormat('D MMM'),
+                'due_label'   => $t->due_date ? $t->due_date->locale('es')->isoFormat('D MMM') : null,
                 'is_overdue'  => $t->due_date && $t->due_date->isPast() && $t->status !== 'done',
                 'focus_sessions_count' => $t->focus_sessions_count,
                 'parent_task' => $t->parentTask ? ['id' => $t->parentTask->id, 'title' => $t->parentTask->title] : null,
@@ -88,7 +104,11 @@ class TaskController extends Controller
             'pending'     => $user->tasks()->where('status', 'pending')->count(),
             'in_progress' => $user->tasks()->where('status', 'in_progress')->count(),
             'done_today'  => $user->tasks()->whereDate('completed_at', Carbon::today())->count(),
-            'overdue'     => $user->tasks()->whereNotNull('due_date')->where('due_date', '<', Carbon::today())->where('status', '!=', 'done')->count(),
+            'overdue'     => $user->tasks()
+                ->whereNotNull('due_date')
+                ->where('due_date', '<', Carbon::today())
+                ->where('status', '!=', 'done')
+                ->count(),
         ];
 
         return Inertia::render('Tasks/Index', [
@@ -109,8 +129,12 @@ class TaskController extends Controller
             : null;
 
         $templateData = null;
+
         if ($templateId = $request->get('template')) {
-            $template = Template::where('user_id', $user->id)->where('type', 'task')->find($templateId);
+            $template = Template::where('user_id', $user->id)
+                ->where('type', 'task')
+                ->find($templateId);
+
             $templateData = $template ? $template->fields : null;
         }
 
@@ -131,19 +155,19 @@ class TaskController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'title'              => 'required|string|max:255',
-            'description'        => 'nullable|string',
-            'priority'           => 'required|in:low,medium,high,urgent',
-            'status'             => 'required|in:pending,in_progress,done',
-            'due_date'           => 'nullable|date',
-            'project_id'         => 'nullable|exists:projects,id',
-            'entry_id'           => 'nullable|exists:entries,id',
-            'parent_task_id'     => 'nullable|exists:tasks,id',
-            'recurrence_type'    => 'nullable|in:none,daily,weekly,monthly',
+            'title'               => 'required|string|max:255',
+            'description'         => 'nullable|string',
+            'priority'            => 'required|in:low,medium,high,urgent',
+            'status'              => 'required|in:pending,in_progress,done',
+            'due_date'            => 'nullable|date',
+            'project_id'          => 'nullable|exists:projects,id',
+            'entry_id'            => 'nullable|exists:entries,id',
+            'parent_task_id'      => 'nullable|exists:tasks,id',
+            'recurrence_type'     => 'nullable|in:none,daily,weekly,monthly',
             'recurrence_interval' => 'nullable|integer|min:1|max:365',
-            'recurrence_ends_at' => 'nullable|date',
-            'tags'               => 'nullable|array',
-            'tags.*'             => 'exists:tags,id',
+            'recurrence_ends_at'  => 'nullable|date',
+            'tags'                => 'nullable|array',
+            'tags.*'              => 'exists:tags,id',
         ]);
 
         // Bloquear subtareas anidadas
@@ -154,8 +178,8 @@ class TaskController extends Controller
 
         $task = $request->user()->tasks()->create([
             ...$data,
-            'completed_at' => $data['status'] === 'done' ? now() : null,
-            'recurrence_type'    => $data['recurrence_type'] ?? 'none',
+            'completed_at'        => $data['status'] === 'done' ? now() : null,
+            'recurrence_type'     => $data['recurrence_type'] ?? 'none',
             'recurrence_interval' => $data['recurrence_interval'] ?? 1,
         ]);
 
@@ -200,24 +224,35 @@ class TaskController extends Controller
                 'created_at'   => $task->created_at->locale('es')->diffForHumans(),
                 'project'      => $task->project,
                 'tags'         => $task->tags,
-                'entry'        => $task->entry ? ['id' => $task->entry->id, 'title' => $task->entry->title, 'date' => $task->entry->entry_date->locale('es')->isoFormat('D MMM')] : null,
-                'parent_task'  => $task->parentTask ? ['id' => $task->parentTask->id, 'title' => $task->parentTask->title] : null,
+                'entry'        => $task->entry ? [
+                    'id'    => $task->entry->id,
+                    'title' => $task->entry->title,
+                    'date'  => $task->entry->entry_date->locale('es')->isoFormat('D MMM'),
+                ] : null,
+                'parent_task'  => $task->parentTask ? [
+                    'id'    => $task->parentTask->id,
+                    'title' => $task->parentTask->title,
+                ] : null,
                 'subtasks'     => $task->subtasks->map(fn($s) => [
                     'id'           => $s->id,
                     'title'        => $s->title,
                     'status'       => $s->status,
                     'priority'     => $s->priority,
                     'due_date'     => $s->due_date ? $s->due_date->format('Y-m-d') : null,
-                    'due_label'    => $s->due_date ? $s->due_date->locale : null('es')->isoFormat('D MMM'),
+                    'due_label'    => $s->due_date ? $s->due_date->locale('es')->isoFormat('D MMM') : null,
                     'is_overdue'   => $s->due_date && $s->due_date->isPast() && $s->status !== 'done',
-                    'tags'         => $s->tags->map(fn($t) => ['id' => $t->id, 'name' => $t->name, 'color' => $t->color]),
-                    'completed_at' => $s->completed_at ? $s->completed_at->toISOString : null(),
+                    'tags'         => $s->tags->map(fn($t) => [
+                        'id'    => $t->id,
+                        'name'  => $t->name,
+                        'color' => $t->color,
+                    ]),
+                    'completed_at' => $s->completed_at ? $s->completed_at->toISOString() : null,
                 ]),
-                'subtask_progress' => $task->subtaskProgress(),
-                'recurrence_type'  => $task->recurrence_type,
+                'subtask_progress'    => $task->subtaskProgress(),
+                'recurrence_type'     => $task->recurrence_type,
                 'recurrence_interval' => $task->recurrence_interval,
-                'recurrence_ends_at' => $task->recurrence_ends_at ? $task->recurrence_ends_at->format('Y-m-d') : null,
-                'attachments'  => $task->attachments->map(fn($a) => [
+                'recurrence_ends_at'  => $task->recurrence_ends_at ? $task->recurrence_ends_at->format('Y-m-d') : null,
+                'attachments'         => $task->attachments->map(fn($a) => [
                     'id'            => $a->id,
                     'original_name' => $a->original_name,
                     'mime_type'     => $a->mime_type,
@@ -246,18 +281,18 @@ class TaskController extends Controller
 
         return Inertia::render('Tasks/Form', [
             'task'     => [
-                'id'          => $task->id,
-                'title'       => $task->title,
-                'description' => $task->description,
-                'priority'    => $task->priority,
-                'status'      => $task->status,
-                'due_date'    => $task->due_date ? $task->due_date->format('Y-m-d') : null,
-                'project_id'  => $task->project_id,
-                'entry_id'    => $task->entry_id,
-                'tags'        => $task->tags->pluck('id'),
-                'recurrence_type' => $task->recurrence_type,
+                'id'                  => $task->id,
+                'title'               => $task->title,
+                'description'         => $task->description,
+                'priority'            => $task->priority,
+                'status'              => $task->status,
+                'due_date'            => $task->due_date ? $task->due_date->format('Y-m-d') : null,
+                'project_id'          => $task->project_id,
+                'entry_id'            => $task->entry_id,
+                'tags'                => $task->tags->pluck('id'),
+                'recurrence_type'     => $task->recurrence_type,
                 'recurrence_interval' => $task->recurrence_interval,
-                'recurrence_ends_at' => $task->recurrence_ends_at ? $task->recurrence_ends_at->format('Y-m-d') : null,
+                'recurrence_ends_at'  => $task->recurrence_ends_at ? $task->recurrence_ends_at->format('Y-m-d') : null,
             ],
             'projects' => $user->projects()->where('is_active', true)->orderBy('name', 'asc')->get(['id', 'name', 'color']),
             'tags'     => $user->tags()->orderBy('name', 'asc')->get(['id', 'name', 'color']),
@@ -271,18 +306,18 @@ class TaskController extends Controller
         abort_unless($task->user_id === $request->user()->id, 403);
 
         $data = $request->validate([
-            'title'              => 'required|string|max:255',
-            'description'        => 'nullable|string',
-            'priority'           => 'required|in:low,medium,high,urgent',
-            'status'             => 'required|in:pending,in_progress,done',
-            'due_date'           => 'nullable|date',
-            'project_id'         => 'nullable|exists:projects,id',
-            'entry_id'           => 'nullable|exists:entries,id',
-            'recurrence_type'    => 'nullable|in:none,daily,weekly,monthly',
+            'title'               => 'required|string|max:255',
+            'description'         => 'nullable|string',
+            'priority'            => 'required|in:low,medium,high,urgent',
+            'status'              => 'required|in:pending,in_progress,done',
+            'due_date'            => 'nullable|date',
+            'project_id'          => 'nullable|exists:projects,id',
+            'entry_id'            => 'nullable|exists:entries,id',
+            'recurrence_type'     => 'nullable|in:none,daily,weekly,monthly',
             'recurrence_interval' => 'nullable|integer|min:1|max:365',
-            'recurrence_ends_at' => 'nullable|date',
-            'tags'               => 'nullable|array',
-            'tags.*'             => 'exists:tags,id',
+            'recurrence_ends_at'  => 'nullable|date',
+            'tags'                => 'nullable|array',
+            'tags.*'              => 'exists:tags,id',
         ]);
 
         // Registrar completed_at al marcar done
@@ -294,9 +329,10 @@ class TaskController extends Controller
 
         $task->update([
             ...$data,
-            'recurrence_type'    => $data['recurrence_type'] ?? 'none',
+            'recurrence_type'     => $data['recurrence_type'] ?? 'none',
             'recurrence_interval' => $data['recurrence_interval'] ?? 1,
         ]);
+
         $task->tags()->sync($data['tags'] ?? []);
 
         return redirect()->route('tasks.show', $task)->with('success', 'Tarea actualizada.');
@@ -305,12 +341,13 @@ class TaskController extends Controller
     public function destroy(Request $request, Task $task)
     {
         abort_unless($task->user_id === $request->user()->id, 403);
+
         $task->delete();
 
         return redirect()->route('tasks.index')->with('success', 'Tarea eliminada.');
     }
 
-    // PATCH /tasks/{task}/toggle  — alterna done ↔ pending sin abrir el form
+    // PATCH /tasks/{task}/toggle — alterna done ↔ pending sin abrir el form
     public function toggle(Request $request, Task $task)
     {
         abort_unless($task->user_id === $request->user()->id, 403);
@@ -332,8 +369,8 @@ class TaskController extends Controller
     public function reorder(Request $request)
     {
         $data = $request->validate([
-            'tasks' => 'required|array',
-            'tasks.*.id'   => 'required|integer',
+            'tasks'              => 'required|array',
+            'tasks.*.id'         => 'required|integer',
             'tasks.*.sort_order' => 'required|integer',
         ]);
 
@@ -341,6 +378,7 @@ class TaskController extends Controller
 
         foreach ($data['tasks'] as $item) {
             $task = $user->tasks()->find($item['id']);
+
             if ($task) {
                 $task->update(['sort_order' => $item['sort_order']]);
             }
@@ -362,7 +400,7 @@ class TaskController extends Controller
             'status'   => 'nullable|in:pending,in_progress,done',
         ]);
 
-        $subtask = $request->user()->tasks()->create([
+        $request->user()->tasks()->create([
             'title'          => $data['title'],
             'priority'       => $data['priority'] ?? 'medium',
             'status'         => $data['status'] ?? 'pending',
@@ -391,15 +429,25 @@ class TaskController extends Controller
         if ($project = $request->get('project_id')) {
             $query->where('project_id', $project);
         }
+
         if ($priority = $request->get('priority')) {
             $query->where('priority', $priority);
         }
+
         if ($tag = $request->get('tag')) {
             $query->whereHas('tags', fn($q) => $q->where('name', $tag));
         }
 
         $allTasks = $query
-            ->orderByRaw("FIELD(priority,'urgent','high','medium','low')")
+            ->orderByRaw("
+                CASE priority
+                    WHEN 'urgent' THEN 1
+                    WHEN 'high' THEN 2
+                    WHEN 'medium' THEN 3
+                    WHEN 'low' THEN 4
+                    ELSE 5
+                END
+            ")
             ->orderBy('due_date', 'asc')
             ->orderBy('sort_order', 'asc')
             ->get()
@@ -409,10 +457,14 @@ class TaskController extends Controller
                 'priority'        => $t->priority,
                 'status'          => $t->status,
                 'due_date'        => $t->due_date ? $t->due_date->format('Y-m-d') : null,
-                'due_label'       => $t->due_date ? $t->due_date->locale : null('es')->isoFormat('D MMM'),
+                'due_label'       => $t->due_date ? $t->due_date->locale('es')->isoFormat('D MMM') : null,
                 'is_overdue'      => $t->due_date && $t->due_date->isPast() && $t->status !== 'done',
                 'project'         => $t->project ? ['id' => $t->project->id, 'name' => $t->project->name, 'color' => $t->project->color] : null,
-                'tags'            => $t->tags->map(fn($tag) => ['id' => $tag->id, 'name' => $tag->name, 'color' => $tag->color]),
+                'tags'            => $t->tags->map(fn($tag) => [
+                    'id'    => $tag->id,
+                    'name'  => $tag->name,
+                    'color' => $tag->color,
+                ]),
                 'subtasks_count'  => $t->subtasks_count,
                 'subtasks_done'   => $t->subtasks_done_count,
                 'recurrence_type' => $t->recurrence_type,
@@ -460,10 +512,10 @@ class TaskController extends Controller
     public function bulkUpdate(Request $request)
     {
         $data = $request->validate([
-            'task_ids'  => 'required|array|min:1',
+            'task_ids'   => 'required|array|min:1',
             'task_ids.*' => 'required|integer',
-            'status'    => 'nullable|in:pending,in_progress,done',
-            'priority'  => 'nullable|in:low,medium,high,urgent',
+            'status'     => 'nullable|in:pending,in_progress,done',
+            'priority'   => 'nullable|in:low,medium,high,urgent',
             'project_id' => 'nullable|integer|exists:projects,id',
         ]);
 
@@ -472,7 +524,10 @@ class TaskController extends Controller
 
         foreach ($data['task_ids'] as $taskId) {
             $task = $user->tasks()->find($taskId);
-            if (!$task) continue;
+
+            if (!$task) {
+                continue;
+            }
 
             $updateData = [];
 
@@ -508,7 +563,7 @@ class TaskController extends Controller
         }
 
         return response()->json([
-            'ok' => true,
+            'ok'      => true,
             'updated' => $updated,
             'message' => "$updated tarea(s) actualizada(s).",
         ]);
@@ -518,7 +573,7 @@ class TaskController extends Controller
     public function bulkDelete(Request $request)
     {
         $data = $request->validate([
-            'task_ids'  => 'required|array|min:1',
+            'task_ids'   => 'required|array|min:1',
             'task_ids.*' => 'required|integer',
         ]);
 
@@ -527,6 +582,7 @@ class TaskController extends Controller
 
         foreach ($data['task_ids'] as $taskId) {
             $task = $user->tasks()->find($taskId);
+
             if ($task) {
                 $task->delete();
                 $deleted++;
@@ -534,7 +590,7 @@ class TaskController extends Controller
         }
 
         return response()->json([
-            'ok' => true,
+            'ok'      => true,
             'deleted' => $deleted,
             'message' => "$deleted tarea(s) eliminada(s).",
         ]);
